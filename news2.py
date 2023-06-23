@@ -4,6 +4,8 @@ import feedparser
 import yaml 
 from bs4 import BeautifulSoup
 import os.path
+import findfeed
+import findfeed2
 
 
 class News(object):
@@ -94,14 +96,16 @@ class News(object):
         else:
             print ("se ejecuta wrapperCheck")
             nuevo_feed=self.wrapperCheck(nuevo_feed)
-            if (self.checkIfUrlHasEntries(nuevo_feed)):
-                lsita=self.loadyaml()
-                el={"titulo":"","link":nuevo_feed}
-                lsita.append(el)
-                self.feed2yaml(lsita)
-            else:
-                print ("no se encontro feed valido") 
-
+            try:
+                if (self.checkIfUrlHasEntries(nuevo_feed)):
+                    lsita=self.loadyaml()
+                    el={"titulo":"","link":nuevo_feed}
+                    lsita.append(el)
+                    self.feed2yaml(lsita)
+                else:
+                    print ("no se encontro feed valido") 
+            except:
+                print("e")
     def print_dictlist(self, array):
         if type(array)==list:
             for x in array:
@@ -221,15 +225,37 @@ class News(object):
             return True
         
     def checkForFeedInSourceCode(self,url):
-        pass
+        urlList = findfeed.findfeed(url)
+        if urlList:
+            print (urlList[0])
+            return urlList[0]
+        else:
+            urlList = findfeed2.find_rss_links(url)
+            if urlList:
+                print (urlList[0])
+                return urlList[0]
+            else: 
+                print("No se encontraron feeds")
+
 
     def wrapperCheck(self,url):
         if (self.checkForWordpressFormat(url)):
             url = "{0}feed".format(url)
-        if (self.checkForTumblrFormat(url)):
+            return url
+        elif (self.checkForTumblrFormat(url)):
             url = "{0}rss".format(url)
-        if (self.checkForBloggerFormat(url)):
+            return url
+        elif (self.checkForBloggerFormat(url)):
             url = "{0}feeds/posts/default".format(url)
-        if (self.checkForMediumFormat(url)):
+            return url
+        elif (self.checkForMediumFormat(url)):
             url = url[:19] + 'feed/' + url[19:]
-        return url
+            return url
+        else: 
+            print ("probando metodos externos")
+            try :
+                url = self.checkForFeedInSourceCode(url)
+                return url
+            except:
+                print("e")
+
