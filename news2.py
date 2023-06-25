@@ -56,6 +56,7 @@ class News(object):
         self.addFeed(nuevo_feed)
 
     def printFeedList(self, array):
+        '''imprime lista de sitios en ver_feeds'''
         if type(array)==list:
             for x in array:
                 # print (str(array.index(x)+1) +' - ' + x)
@@ -95,8 +96,8 @@ class News(object):
         text = soup.get_text()
         return text
     
-    '''no funciona'''
     def mostrarNoticiasrecientes(self): 
+        '''no funciona arreglar'''
         lista = self.loadyaml()
         table_titles = []
         table_article_titles = []
@@ -121,7 +122,7 @@ class News(object):
             return True
 
     def checkIfUrlHasHttp(self,url):
-        if not "http://" or "https://" in url:
+        if not "http://" in url or "https://" in url:
             print("no contiene http")
             url = "http://{0}".format(url)
             return url
@@ -133,107 +134,7 @@ class News(object):
             url = "{0}/".format(url)
         return url
 
-    def checkForWordpressFormat(self,url):
-        url = "{0}feed".format(url)
-        posibleFeed = feedparser.parse(url)
-        if not posibleFeed.entries:
-            print("posibleFeed.entries esta vacio / no es un sitio wordpress")
-        else:
-            print("se encontraron feeds en sitio tipo wordpress")
-            print(url)
-            return url
-
-    def checkForTumblrFormat(self,url):
-        url = "{0}rss".format(url)
-        posibleFeed = feedparser.parse(url)
-        if not posibleFeed.entries:
-            print("posibleFeed.entries esta vacio / no es un sitio tumblr")
-            return False
-        else:
-            print("se encontraron feeds en sitio tipo tumblr")
-            print(url)
-            return True
-        
-    def checkForBloggerFormat(self,url):
-        url = "{0}feeds/posts/default".format(url)
-        posibleFeed = feedparser.parse(url)
-        if not posibleFeed.entries:
-            print("posibleFeed.entries esta vacio / no es un sitio blogger")
-            return False
-        else:
-            print("se encontraron feeds en sitio tipo blogger")
-            print(url)
-            return True
-
-    def checkForMediumFormat(self,url):
-        url = url[:19] + 'feed/' + url[19:]
-        # https://medium.com/feed/example-site
-        posibleFeed = feedparser.parse(url)
-        if not posibleFeed.entries:
-            print("posibleFeed.entries esta vacio / no es un sitio medium")
-            return False
-        else:
-            print("se encontraron feeds en sitio tipo medium")
-            print(url)
-            return True
-        
-    def checkForFeedInSourceCode(self,url):
-        urlList = findfeed.findfeed(url)
-        if urlList:
-            print (urlList[0])
-            return urlList[0]
-        else:
-            urlList = findfeed2.find_rss_links(url)
-            if urlList:
-                print (urlList[0])
-                return urlList[0]
-            else: 
-                print("No se encontraron feeds")
-
-    def checkForBlogSlashRss(self,url):
-        url = "{0}blog/rss".format(url)
-        posibleFeed = feedparser.parse(url)
-        if not posibleFeed.entries:
-            print("no se encontraron feeds en {0}".format(url))
-            return False
-        else:
-            print("se encontraron feeds en {0}".format(url))
-            print(url)
-            return True
-
-    def checkForBlogSlashFeed(self,url):
-        url = "{0}blog/feed".format(url)
-        posibleFeed = feedparser.parse(url)
-        if not posibleFeed.entries:
-            print("no se encontraron feeds en {0}".format(url))
-            return False
-        else:
-            print("se encontraron feeds en {0}".format(url))
-            print(url)
-            return True
-
-    def checkForRssDotXml(self,url):
-        url = "{0}rss.xml".format(url)
-        posibleFeed = feedparser.parse(url)
-        if not posibleFeed.entries:
-            print("no se encontraron feeds en {0}".format(url))
-            return False
-        else:
-            print("se encontraron feeds en {0}".format(url))
-            print(url)
-            return True
-
-    def checkForBlogSlashRssDotXml(self,url):
-        url = "{0}blog/rss.xml".format(url)
-        posibleFeed = feedparser.parse(url)
-        if not posibleFeed.entries:
-            print("no se encontraron feeds en {0}".format(url))
-            return False
-        else:
-            print("se encontraron feeds en {0}".format(url))
-            print(url)
-            return True
-
+    
     def wrapperCheck(self,url):
         feed_url = url + "feed"
         try:
@@ -318,7 +219,8 @@ class News(object):
 
 
     def addFeed(self,nuevo_feed):
-        nuevo_feed=self.checkIfUrlHasSlash(nuevo_feed)
+        # nuevo_feed = self.checkIfUrlHasHttp(nuevo_feed)
+        nuevo_feed = self.checkIfUrlHasSlash(nuevo_feed)
         if (self.checkIfUrlHasEntries(nuevo_feed)):
             self.addFeed2(nuevo_feed)
         else:
@@ -330,28 +232,44 @@ class News(object):
                 else:
                     print ("no se encontro feed valido")    
             except Exception:
-                print(Exception)
+                pass
 
     def addFeed2(self,nuevo_feed):
         lsita=self.loadyaml()
         el={"titulo":"","link":nuevo_feed}
+        el = self.fetch_title(el)
         if self.checkIfAlreadyOnFeedList(nuevo_feed,lsita):
             print("La Url {0} ya existe en la lista".format(nuevo_feed))
+        elif self.checkIfTitleExists(el["titulo"], lsita):
+            print("Hay un feed con titulo {0} en la lista".format(el["titulo"]))
         else:
             lsita.append(el)
             self.feed2yaml(lsita)
         
-    def checkIfAlreadyOnFeedList(self,value,feedlist):
+    def checkIfAlreadyOnFeedList(self,link,feedlist):
         if any(
-            element.get('link') == value
+            element.get('link') == link
             for element in feedlist 
         ):
             return True
         if not any(
-            element.get('link') == value
+            element.get('link') == link
             for element in feedlist 
         ):
             return False
+        
+    def checkIfTitleExists(self,title,feedlist):
+        if any(
+            element.get('titulo') == title
+            for element in feedlist 
+        ):
+            return True
+        if not any(
+            element.get('titulo') == title
+            for element in feedlist 
+        ):
+            return False
+
         
     def printArticleList(self,siteFeed):
         '''imprime lista de articulos en ver_feeds'''
@@ -362,15 +280,26 @@ class News(object):
 
     def printArticle(self,siteFeed,articleIndex):
         '''imprime articulo seleccionado'''
-        article = siteFeed.entries[int(articleIndex)-1].title
-        article += '\n'
-        article += siteFeed.entries[int(articleIndex)-1].link
-        article += '\n'
-        article += siteFeed.entries[int(articleIndex)-1].description
+        article = siteFeed.entries[int(articleIndex)-1].title + '\n' + siteFeed.entries[int(articleIndex)-1].link + '\n' + siteFeed.entries[int(articleIndex)-1].description
         esHtml = bool(BeautifulSoup(article, "html.parser").find())
-
         if (esHtml):
             print ("HTML Detectado.")
             print (self.htmlTotext(article))
         else:
             print(article)
+
+    def checkForFeedInSourceCode(self,url):
+        '''metodos adicionales para busqueda de feeds validos en codigo fuente de pagina'''
+        urlList = findfeed.findfeed(url)
+        if urlList:
+            print (urlList[0])
+            return urlList[0]
+        else:
+            urlList = findfeed2.find_rss_links(url)
+            if urlList:
+                print (urlList[0])
+                return urlList[0]
+            else: 
+                print("No se encontraron feeds")
+
+    
