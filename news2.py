@@ -298,13 +298,12 @@ class News(object):
                 print("e")
 
     def addFeed2(self,nuevo_feed):
-        # print("nuevo_feed en addFeed2 {0}".format(nuevo_feed))
         lsita=self.loadyaml()
         el={"titulo":"","link":nuevo_feed}
-        lsita.append(el)
         if self.checkIfAlreadyOnFeedList(nuevo_feed,lsita):
             print("La Url {0} ya existe en la lista".format(nuevo_feed))
         else:
+            lsita.append(el)
             self.feed2yaml(lsita)
         
     def printFeedList(self,feedDictionary):
@@ -314,10 +313,17 @@ class News(object):
             index += 1
 
     def checkIfAlreadyOnFeedList(self,value,feedlist):
-        ''' no itera a traves de toda la lista de dictionarios'''
-        
-        for element in feedlist:
-            # print (element['link'])
-            if (value == element['link']):
-                return True
-            
+        # for element in feedlist:
+        #     # print (element['link'])
+        #     if (value == element['link']):
+        #         return True
+        if any(
+            element.get('link') == value
+            for element in feedlist 
+        ):
+            return True
+        if not any(
+            element.get('link') == value
+            for element in feedlist 
+        ):
+            return False
