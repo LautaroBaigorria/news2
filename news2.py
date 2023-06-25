@@ -16,39 +16,24 @@ class News(object):
         #  listaPorDefecto = ['http://rss.slashdot.org/Slashdot/slashdot','http://www.digg.com/rss/index.xml','https://www.tecmint.com/feed/','https://www.reddit.com/r/Python/.rss']
         lista=self.loadyaml()
         self.niltotitle(lista)
-        self.print_dictlist(lista)      
-        select_feed=input('Seleccione la Fuente deseada o presione \'M\' para volver al menu principal ')
-        if select_feed.lower()=='m':
+        self.printFeedList(lista)      
+        selectedFeed=input('Seleccione la Fuente deseada o presione \'M\' para volver al menu principal ')
+        if selectedFeed.lower()=='m':
             pass
             #self.mostrar_menu()
         else:
-            # self.print_feedlist(lista)
-            d=feedparser.parse(lista[int(select_feed)-1]["link"])
-            i=0
-            while i <len(d.entries):
-                print (str(i+1)+ ' - '  + d.entries[i].title)
-                i+=1
-            select_item=input('Seleccione articulo: ')
-            article = d.entries[int(select_item)-1].title
-            article += '\n'
-            article += d.entries[int(select_item)-1].link
-            article += '\n'
-            article += d.entries[int(select_item)-1].description
-            esHtml = bool(BeautifulSoup(article, "html.parser").find())
-
-            if (esHtml):
-                print ("HTML Detectado.")
-                print (self.htmlTotext(article))
-            else:
-                print(article)
-
+            siteFeed=feedparser.parse(lista[int(selectedFeed)-1]["link"])
+            self.printArticleList(siteFeed)
+            articleIndex = input('Seleccione articulo: ')
+            self.printArticle(siteFeed,articleIndex) #desde aqui para abajo 
+            
     def agregarfeed(self):
         nuevo_feed=input('Escriba link de nuevo feed: ')
         self.addFeed(nuevo_feed)
 
     def borrarfeed(self):
         lista=self.loadyaml()
-        self.print_dictlist(lista)
+        self.printFeedList(lista)
         feed_a_borrar=input('Seleccione feed a borrar: ')
         del lista[int(feed_a_borrar)-1]
         self.feed2yaml(lista)
@@ -70,7 +55,7 @@ class News(object):
     def agregarfeedcmdline(self,nuevo_feed):
         self.addFeed(nuevo_feed)
 
-    def print_dictlist(self, array):
+    def printFeedList(self, array):
         if type(array)==list:
             for x in array:
                 # print (str(array.index(x)+1) +' - ' + x)
@@ -356,12 +341,6 @@ class News(object):
             lsita.append(el)
             self.feed2yaml(lsita)
         
-    def printFeedList(self,feedDictionary):
-        index = 0
-        while index < len(feedDictionary["urls"]):
-            print(str(index+1)+ " - " + feedDictionary["urls"][index])
-            index += 1
-
     def checkIfAlreadyOnFeedList(self,value,feedlist):
         if any(
             element.get('link') == value
@@ -373,3 +352,25 @@ class News(object):
             for element in feedlist 
         ):
             return False
+        
+    def printArticleList(self,siteFeed):
+        '''imprime lista de articulos en ver_feeds'''
+        i=0
+        while i <len(siteFeed.entries):
+            print (str(i+1)+ ' - '  + siteFeed.entries[i].title)
+            i+=1
+
+    def printArticle(self,siteFeed,articleIndex):
+        '''imprime articulo seleccionado'''
+        article = siteFeed.entries[int(articleIndex)-1].title
+        article += '\n'
+        article += siteFeed.entries[int(articleIndex)-1].link
+        article += '\n'
+        article += siteFeed.entries[int(articleIndex)-1].description
+        esHtml = bool(BeautifulSoup(article, "html.parser").find())
+
+        if (esHtml):
+            print ("HTML Detectado.")
+            print (self.htmlTotext(article))
+        else:
+            print(article)
