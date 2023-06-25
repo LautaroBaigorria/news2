@@ -14,14 +14,14 @@ class News(object):
         pass
     def ver_feeds(self):
         #  listaPorDefecto = ['http://rss.slashdot.org/Slashdot/slashdot','http://www.digg.com/rss/index.xml','https://www.tecmint.com/feed/','https://www.reddit.com/r/Python/.rss']
-         lista=self.loadyaml()
-         self.niltotitle(lista)
-         self.print_dictlist(lista)      
-         select_feed=input('Seleccione la Fuente deseada o presione \'M\' para volver al menu principal ')
-         if select_feed.lower()=='m':
+        lista=self.loadyaml()
+        self.niltotitle(lista)
+        self.print_dictlist(lista)      
+        select_feed=input('Seleccione la Fuente deseada o presione \'M\' para volver al menu principal ')
+        if select_feed.lower()=='m':
             pass
             #self.mostrar_menu()
-         else:
+        else:
             # self.print_feedlist(lista)
             d=feedparser.parse(lista[int(select_feed)-1]["link"])
             i=0
@@ -44,24 +44,7 @@ class News(object):
 
     def agregarfeed(self):
         nuevo_feed=input('Escriba link de nuevo feed: ')
-        # nuevo_feed=self.checkIfUrlHasHttp(nuevo_feed)
-        nuevo_feed=self.checkIfUrlHasSlash(nuevo_feed)
-        if (self.checkIfUrlHasEntries(nuevo_feed)):
-            lsita=self.loadyaml()
-            el={"titulo":"","link":nuevo_feed}
-            lsita.append(el)
-            self.feed2yaml(lsita)
-            #self.mostrar_menu()
-        else:
-            print ("se ejecuta wrapperCheck")
-            nuevo_feed=self.wrapperCheck(nuevo_feed)
-            if (self.checkIfUrlHasEntries(nuevo_feed)):
-                lsita=self.loadyaml()
-                el={"titulo":"","link":nuevo_feed}
-                lsita.append(el)
-                self.feed2yaml(lsita)
-            else:
-                print ("no se encontro feed valido")    
+        self.addFeed(nuevo_feed)
 
     def borrarfeed(self):
         lista=self.loadyaml()
@@ -85,27 +68,8 @@ class News(object):
         return lsita
         
     def agregarfeedcmdline(self,nuevo_feed):
-        # nuevo_feed=self.checkIfUrlHasHttp(nuevo_feed)
-        nuevo_feed=self.checkIfUrlHasSlash(nuevo_feed)
-        if (self.checkIfUrlHasEntries(nuevo_feed)):
-            lsita=self.loadyaml()
-            el={"titulo":"","link":nuevo_feed}
-            lsita.append(el)
-            self.feed2yaml(lsita)
-            # self.mostrar_menu()
-        else:
-            print ("se ejecuta wrapperCheck")
-            nuevo_feed=self.wrapperCheck(nuevo_feed)
-            try:
-                if (self.checkIfUrlHasEntries(nuevo_feed)):
-                    lsita=self.loadyaml()
-                    el={"titulo":"","link":nuevo_feed}
-                    lsita.append(el)
-                    self.feed2yaml(lsita)
-                else:
-                    print ("no se encontro feed valido") 
-            except:
-                print("e")
+        self.addFeed(nuevo_feed)
+
     def print_dictlist(self, array):
         if type(array)==list:
             for x in array:
@@ -114,6 +78,7 @@ class News(object):
                     print (str(array.index(x)+1) + ' - ' + x["link"])
                 else:
                     print (str(array.index(x)+1) + ' - ' + x["titulo"])
+    
     def dicttoyaml(self):
         lsita=[]
         lista=[]
@@ -160,7 +125,10 @@ class News(object):
             print("{: ^20} {: ^20} {: ^20} {: ^20}".format(*row))    
 
     def checkIfUrlHasEntries(self,url):
-        posibleFeed = feedparser.parse(url)
+        try:
+            posibleFeed = feedparser.parse(url)
+        except:
+            print("e")
         if not (posibleFeed.entries):
             print ("posibleFeed.entries esta vacio")
             return False
@@ -237,6 +205,49 @@ class News(object):
             else: 
                 print("No se encontraron feeds")
 
+    def checkForBlogSlashRss(self,url):
+        url = "{0}blog/rss".format(url)
+        posibleFeed = feedparser.parse(url)
+        if not posibleFeed.entries:
+            print("no se encontraron feeds en {0}".format(url))
+            return False
+        else:
+            print("se encontraron feeds en {0}".format(url))
+            print(url)
+            return True
+
+    def checkForBlogSlashFeed(self,url):
+        url = "{0}blog/feed".format(url)
+        posibleFeed = feedparser.parse(url)
+        if not posibleFeed.entries:
+            print("no se encontraron feeds en {0}".format(url))
+            return False
+        else:
+            print("se encontraron feeds en {0}".format(url))
+            print(url)
+            return True
+
+    def checkForRssDotXml(self,url):
+        url = "{0}rss.xml".format(url)
+        posibleFeed = feedparser.parse(url)
+        if not posibleFeed.entries:
+            print("no se encontraron feeds en {0}".format(url))
+            return False
+        else:
+            print("se encontraron feeds en {0}".format(url))
+            print(url)
+            return True
+
+    def checkForBlogSlashRssDotXml(self,url):
+        url = "{0}blog/rss.xml".format(url)
+        posibleFeed = feedparser.parse(url)
+        if not posibleFeed.entries:
+            print("no se encontraron feeds en {0}".format(url))
+            return False
+        else:
+            print("se encontraron feeds en {0}".format(url))
+            print(url)
+            return True
 
     def wrapperCheck(self,url):
         if (self.checkForWordpressFormat(url)):
@@ -251,6 +262,18 @@ class News(object):
         elif (self.checkForMediumFormat(url)):
             url = url[:19] + 'feed/' + url[19:]
             return url
+        elif (self.checkForBlogSlashRss(url)):
+            url = "{0}blog/rss".format(url)
+            return url
+        elif (self.checkForBlogSlashFeed(url)):
+            url = "{0}blog/feed".format(url)
+            return url
+        elif (self.checkForRssDotXml(url)):
+            url = "{0}rss.xml".format(url)
+            return url
+        elif (self.checkForBlogSlashRssDotXml(url)):
+            url = "{0}blog/rss.xml".format(url)
+            return url
         else: 
             print ("probando metodos externos")
             try :
@@ -259,3 +282,42 @@ class News(object):
             except:
                 print("e")
 
+    def addFeed(self,nuevo_feed):
+        nuevo_feed=self.checkIfUrlHasSlash(nuevo_feed)
+        if (self.checkIfUrlHasEntries(nuevo_feed)):
+            self.addFeed2(nuevo_feed)
+        else:
+            print ("se ejecuta wrapperCheck")
+            nuevo_feed=self.wrapperCheck(nuevo_feed)
+            try:
+                if (self.checkIfUrlHasEntries(nuevo_feed)):
+                    self.addFeed2(nuevo_feed)
+                else:
+                    print ("no se encontro feed valido")    
+            except:
+                print("e")
+
+    def addFeed2(self,nuevo_feed):
+        # print("nuevo_feed en addFeed2 {0}".format(nuevo_feed))
+        lsita=self.loadyaml()
+        el={"titulo":"","link":nuevo_feed}
+        lsita.append(el)
+        if self.checkIfAlreadyOnFeedList(nuevo_feed,lsita):
+            print("La Url {0} ya existe en la lista".format(nuevo_feed))
+        else:
+            self.feed2yaml(lsita)
+        
+    def printFeedList(self,feedDictionary):
+        index = 0
+        while index < len(feedDictionary["urls"]):
+            print(str(index+1)+ " - " + feedDictionary["urls"][index])
+            index += 1
+
+    def checkIfAlreadyOnFeedList(self,value,feedlist):
+        ''' no itera a traves de toda la lista de dictionarios'''
+        
+        for element in feedlist:
+            # print (element['link'])
+            if (value == element['link']):
+                return True
+            
