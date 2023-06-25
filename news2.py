@@ -250,37 +250,87 @@ class News(object):
             return True
 
     def wrapperCheck(self,url):
-        if (self.checkForWordpressFormat(url)):
-            url = "{0}feed".format(url)
-            return url
-        elif (self.checkForTumblrFormat(url)):
-            url = "{0}rss".format(url)
-            return url
-        elif (self.checkForBloggerFormat(url)):
-            url = "{0}feeds/posts/default".format(url)
-            return url
-        elif (self.checkForMediumFormat(url)):
-            url = url[:19] + 'feed/' + url[19:]
-            return url
-        elif (self.checkForBlogSlashRss(url)):
-            url = "{0}blog/rss".format(url)
-            return url
-        elif (self.checkForBlogSlashFeed(url)):
-            url = "{0}blog/feed".format(url)
-            return url
-        elif (self.checkForRssDotXml(url)):
-            url = "{0}rss.xml".format(url)
-            return url
-        elif (self.checkForBlogSlashRssDotXml(url)):
-            url = "{0}blog/rss.xml".format(url)
-            return url
-        else: 
+        feed_url = url + "feed"
+        try:
+            feed = feedparser.parse(feed_url)
+            if feed.entries:
+                return feed_url
+        except Exception:
+            pass
+
+        feed_url = url + "rss"
+        try:
+            feed = feedparser.parse(feed_url)
+            if feed.entries:
+                return feed_url
+        except Exception:
+            pass
+
+        feed_url = url + "feeds/posts/default"
+        try:
+            feed = feedparser.parse(feed_url)
+            if feed.entries:
+                return feed_url
+        except Exception:
+            pass    
+
+        feed_url = url[:19] + 'feed/' + url[19:]
+        try:
+            feed = feedparser.parse(feed_url)
+            if feed.entries:
+                return feed_url
+        except Exception:
+            pass  
+
+        feed_url = url + "blog/feed"
+        try:
+            feed = feedparser.parse(feed_url)
+            if feed.entries:
+                return feed_url
+        except Exception:
+            pass
+
+        feed_url = url + "blog/rss"
+        try:
+            feed = feedparser.parse(feed_url)
+            if feed.entries:
+                return feed_url
+        except Exception:
+            pass
+
+        feed_url = url + ".xml"
+        try:
+            feed = feedparser.parse(feed_url)
+            if feed.entries:
+                return feed_url
+        except Exception:
+            pass
+
+        feed_url = url + "rss.xml"
+        try:
+            feed = feedparser.parse(feed_url)
+            if feed.entries:
+                return feed_url
+        except Exception:
+            pass
+
+        feed_url = url + "blog/rss.xml"
+        try:
+            feed = feedparser.parse(feed_url)
+            if feed.entries:
+                return feed_url
+        except Exception:
+            pass
+
+        try:
             print ("probando metodos externos")
-            try :
-                url = self.checkForFeedInSourceCode(url)
-                return url
-            except:
-                print("e")
+            url = self.checkForFeedInSourceCode(url)
+            return url
+        except Exception:
+            pass
+
+        return False
+
 
     def addFeed(self,nuevo_feed):
         nuevo_feed=self.checkIfUrlHasSlash(nuevo_feed)
@@ -294,8 +344,8 @@ class News(object):
                     self.addFeed2(nuevo_feed)
                 else:
                     print ("no se encontro feed valido")    
-            except:
-                print("e")
+            except Exception:
+                print(Exception)
 
     def addFeed2(self,nuevo_feed):
         lsita=self.loadyaml()
@@ -313,10 +363,6 @@ class News(object):
             index += 1
 
     def checkIfAlreadyOnFeedList(self,value,feedlist):
-        # for element in feedlist:
-        #     # print (element['link'])
-        #     if (value == element['link']):
-        #         return True
         if any(
             element.get('link') == value
             for element in feedlist 
