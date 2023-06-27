@@ -96,19 +96,16 @@ class News(object):
         text = soup.get_text()
         return text
     
-    def mostrarNoticiasrecientes(self): 
-        '''no funciona arreglar'''
-        lista = self.loadyaml()
-        table_titles = []
-        table_article_titles = []
-        table_data = [table_titles,table_article_titles]
-        for element in lista:
-            table_titles.append(element["titulo"])
-            feed = feedparser.parse(element["link"])
-            table_article_titles.append(feed.entries[0].title)
-            print(feed.entries[0].title)
-        for row in table_data:
-            print("{: ^20} {: ^20} {: ^20} {: ^20}".format(*row))    
+    def showRecentHeadlines(self): 
+        listaFeeds = self.loadyaml()
+        for element in listaFeeds:
+            try:
+                feed = feedparser.parse(element["link"])
+                print(feed['feed']['title'])
+                print (feed.entries[0].title)
+            except: Exception
+
+          
 
     def checkIfUrlHasEntries(self,url):
         try:

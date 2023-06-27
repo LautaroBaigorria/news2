@@ -18,7 +18,7 @@ class Terminal(object):
         self.mostrar_menu()
         
     def mostrar_menu(self):
-        menu2 = ['Ver feeds', 'Agregar feed','Borrar feed' ,'Salir', 'Convertir a archivo yaml']
+        menu2 = ['Ver feeds', 'Agregar feed','Borrar feed' ,'Salir', 'showRecentHeadlines']
         self.print_list(menu2)
         entrada_usuario=int(input("Seleccione una opcion: "))
         if (entrada_usuario==1):
@@ -33,7 +33,7 @@ class Terminal(object):
         elif (entrada_usuario==4):
             quit()
         elif (entrada_usuario==5):
-            print  ("5")
+            self.news.showRecentHeadlines()
         else:
             print("Opcion no valida")
 
