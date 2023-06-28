@@ -97,13 +97,20 @@ class News(object):
         return text
     
     def showRecentHeadlines(self): 
-        listaFeeds = self.loadyaml()
-        for element in listaFeeds:
-            try:
-                feed = feedparser.parse(element["link"])
-                print(feed['feed']['title'])
-                print (feed.entries[0].title)
-            except: Exception
+        dictList = self.loadyaml()
+        feedList = []
+        
+        print("Parsing Feeds")
+        for element in dictList:
+            feed = feedparser.parse(element["link"])
+            feedList.append(feed) 
+        print("Done!")
+        indexNumber = 0
+        for element in feedList:
+            print(f"{indexNumber+1} - {element['feed']['title']}  -  {element.entries[0].title}")
+            indexNumber+=1
+        selectedNumber = input('Seleccione articulo: ')
+        self.printArticle(feedList[int(selectedNumber)-1],1)
 
           
 
@@ -119,13 +126,11 @@ class News(object):
             return True
 
     def checkIfUrlHasHttp(self,url):
-        if not "http://" in url or "https://" in url:
-            print("no contiene http")
-            url = "http://{0}".format(url)
+        if not "http://" in url and not "https://" in url:
+            return "http://" + url
+        else:
             return url
-        else: 
-            return url
-        
+                
     def checkIfUrlHasSlash(self,url):
         if url[-1] != "/":
             url = "{0}/".format(url)
@@ -216,8 +221,8 @@ class News(object):
 
 
     def addFeed(self,nuevo_feed):
-        # nuevo_feed = self.checkIfUrlHasHttp(nuevo_feed)
         nuevo_feed = self.checkIfUrlHasSlash(nuevo_feed)
+        nuevo_feed = self.checkIfUrlHasHttp(nuevo_feed)
         if (self.checkIfUrlHasEntries(nuevo_feed)):
             self.addFeed2(nuevo_feed)
         else:
