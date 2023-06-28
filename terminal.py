@@ -4,42 +4,32 @@ import news2
 import argparse
 
 class Terminal(object):
-    """docstring for Terminal"""
+    """para ejecutar desde la terminal"""
     def __init__(self):
         self.news=news2.News()
-        # print("Funcion init")
+        
+    def execute(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("-i", type=str, help="link para agregar a lista de feeds")
         args = parser.parse_args()
         if args.i:
-            entrada=str(args)
-            entrada=entrada[13:-2]
-            self.news.agregarfeedcmdline(entrada)
-        self.mostrar_menu()
-        
+            self.news.agregarfeedcmdline(args.i)
+        self.mostrar_menu()  
+    
     def mostrar_menu(self):
-        menu2 = ['Ver feeds', 'Agregar feed','Borrar feed' ,'Salir', 'showRecentHeadlines']
-        self.print_list(menu2)
-        entrada_usuario=int(input("Seleccione una opcion: "))
-        if (entrada_usuario==1):
-            self.news.ver_feeds()
-            self.mostrar_menu()
-        elif (entrada_usuario==2):
-            self.news.agregarfeed()
-            self.mostrar_menu()
-        elif (entrada_usuario==3):
-            self.news.borrarfeed()
-            self.mostrar_menu()
-        elif (entrada_usuario==4):
-            quit()
-        elif (entrada_usuario==5):
-            self.news.showRecentHeadlines()
+        menu = [{'opcion':'Ver feeds','funcion': self.news.ver_feeds},{'opcion':'Agregar feed','funcion': self.news.agregarfeed},{'opcion':'Borrar feed','funcion': self.news.borrarfeed},{'opcion':'Noticias recientes','funcion': self.news.showRecentHeadlines},{'opcion':'Salir','funcion': quit}]
+        self.printMenu(menu)
+        entradaUsuario=int(input("Seleccione una opcion: "))
+        if ((entradaUsuario-1) in range(-1,len(menu))):
+            menu[entradaUsuario-1]['funcion']();self.mostrar_menu()
         else:
-            print("Opcion no valida")
+            print('Opcion no valida!')
+            self.mostrar_menu()
 
-    def print_list(self, array):
-        if type(array)==list:
-            for x in array:
-                print (str(array.index(x)+1) +' - ' + x)
+    def printMenu(self, menu):
+        for element in menu:
+            print(f"{menu.index(element)+1} - {element['opcion']}")
 
-terminal=Terminal()
+if __name__ == "__main__":
+   terminal = Terminal()
+   terminal.execute()
