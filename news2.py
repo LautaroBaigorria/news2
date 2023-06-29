@@ -59,13 +59,12 @@ class News(object):
     def printFeedList(self, array):
         '''imprime lista de sitios en ver_feeds'''
         if type(array)==list:
-            for x in array:
-                # print (str(array.index(x)+1) +' - ' + x)
-                if x["titulo"]=='':
-                    print (str(array.index(x)+1) + ' - ' + x["link"])
+            for element in array:
+                if element["titulo"]=='':
+                    print(f"{array.index(element)+1} - {element['link']}")
                 else:
-                    print (str(array.index(x)+1) + ' - ' + x["titulo"])
-    
+                    print(f"{array.index(element)+1} - {element['titulo']}")
+
     def dicttoyaml(self):
         lsita=[]
         lista=[]
@@ -100,25 +99,21 @@ class News(object):
     def showRecentHeadlines(self): 
         dictList = self.loadyaml()
         feedList = []
-        
         print("Parsing Feeds")
-
         for element in tqdm(dictList):
             feed = feedparser.parse(element["link"])
             feedList.append(feed) 
         print("Done!")
-        indexNumber = 0
         for element in feedList:
-            print(f"{indexNumber+1} - {element['feed']['title']}  -  {element.entries[0].title}")
-            indexNumber+=1
+            print(f"{feedList.index(element)+1} - {element['feed']['title']}  -  {element.entries[0].title}")
         selectedNumber = input('Seleccione articulo: ')
         self.printArticle(feedList[int(selectedNumber)-1],1)
 
     def checkIfUrlHasEntries(self,url):
         try:
             posibleFeed = feedparser.parse(url)
-        except:
-            print("e")
+        except Exception:
+            print(Exception)
         if not (posibleFeed.entries):
             print ("posibleFeed.entries esta vacio")
             return False
@@ -226,7 +221,7 @@ class News(object):
         if (self.checkIfUrlHasEntries(nuevo_feed)):
             self.addFeed2(nuevo_feed)
         else:
-            print ("se ejecuta wrapperCheck")
+            print (f"se ejecuta {self.wrapperCheck.__name__}")
             nuevo_feed=self.wrapperCheck(nuevo_feed)
             try:
                 if (self.checkIfUrlHasEntries(nuevo_feed)):
@@ -275,10 +270,8 @@ class News(object):
         
     def printArticleList(self,siteFeed):
         '''imprime lista de articulos en ver_feeds'''
-        i=0
-        while i <len(siteFeed.entries):
-            print (str(i+1)+ ' - '  + siteFeed.entries[i].title)
-            i+=1
+        for element in siteFeed.entries:
+            print (f"{siteFeed.entries.index(element)+1} - {element.title}")
 
     def printArticle(self,siteFeed,articleIndex):
         '''imprime articulo seleccionado'''
@@ -292,7 +285,7 @@ class News(object):
 
     def checkForFeedInSourceCode(self,url):
         '''metodos adicionales para busqueda de feeds validos en codigo fuente de pagina'''
-        print(f"probando {findfeed.findfeed}")
+        print(f"probando {findfeed.findfeed.__name__}")
         urlList = findfeed.findfeed(url)
         if urlList:
             # print (urlList[0])
@@ -301,7 +294,7 @@ class News(object):
             returnUrl = self.handleUserInput(urlList)
             return returnUrl
         else:
-            print(f"probando {findfeed2.find_rss_links}")
+            print(f"probando {findfeed2.find_rss_links.__name__}")
             urlList = findfeed2.find_rss_links(url)
             if urlList:
                 # print (urlList[0])
