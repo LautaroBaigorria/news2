@@ -8,7 +8,7 @@ class Terminal(object):
     def __init__(self):
         self.news=news2.News()
         
-    def execute(self):
+    def fromCmdLine(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("-i", type=str, help="link para agregar a lista de feeds")
         args = parser.parse_args()
@@ -32,4 +32,4 @@ class Terminal(object):
 
 if __name__ == "__main__":
    terminal = Terminal()
-   terminal.execute()
+   terminal.fromCmdLine()
