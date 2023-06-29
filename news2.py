@@ -112,8 +112,6 @@ class News(object):
         selectedNumber = input('Seleccione articulo: ')
         self.printArticle(feedList[int(selectedNumber)-1],1)
 
-          
-
     def checkIfUrlHasEntries(self,url):
         try:
             posibleFeed = feedparser.parse(url)
@@ -292,16 +290,34 @@ class News(object):
 
     def checkForFeedInSourceCode(self,url):
         '''metodos adicionales para busqueda de feeds validos en codigo fuente de pagina'''
+        print(f"probando {findfeed.findfeed}")
         urlList = findfeed.findfeed(url)
         if urlList:
-            print (urlList[0])
-            return urlList[0]
+            # print (urlList[0])
+            # return urlList[0]
+            self.printUrlList(urlList)
+            returnUrl = self.handleUserInput(urlList)
+            return returnUrl
         else:
+            print(f"probando {findfeed2.find_rss_links}")
             urlList = findfeed2.find_rss_links(url)
             if urlList:
-                print (urlList[0])
-                return urlList[0]
+                # print (urlList[0])
+                # return urlList[0]
+                self.printUrlList(urlList)
+                returnUrl = self.handleUserInput(urlList)
+                return returnUrl    
             else: 
                 print("No se encontraron feeds")
+
+    def printUrlList(self,urlList):
+        print ("Se encontraron estos feeds:")
+        for element in urlList:
+            print (f"{urlList.index(element)+1} - {element}")
+        
+    def handleUserInput(self,urlList):
+        entradaUsuario=int(input("Seleccione una opcion: "))
+        if ((entradaUsuario-1) in range(-1,len(urlList))):
+            return urlList[entradaUsuario-1]
 
     

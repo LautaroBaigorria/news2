@@ -10,6 +10,7 @@ def find_rss_links(url):
         if link.has_attr("href") and "rss" in link["href"]:
             rss_links.append(link["href"])
 
+    # print (f"{rss_links} - {type(rss_links)}")
     return rss_links
 
 if __name__ == "__main__":
