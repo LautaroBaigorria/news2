@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 import os.path
 import findfeed
 import findfeed2
+from tqdm import tqdm
 
 
 class News(object):
@@ -101,7 +102,8 @@ class News(object):
         feedList = []
         
         print("Parsing Feeds")
-        for element in dictList:
+
+        for element in tqdm(dictList):
             feed = feedparser.parse(element["link"])
             feedList.append(feed) 
         print("Done!")
